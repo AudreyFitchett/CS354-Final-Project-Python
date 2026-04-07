@@ -10,11 +10,11 @@ Developed by:
 - Nusrat Afrin
 - Tyler Fernandez
 
-## Features
+## Description
 
 TODO
 
-## Description
+## Features
 
 TODO
 
@@ -23,7 +23,12 @@ TODO
 - Python
 - (add any libraries used here)
 
-## Usage
-
+## Installation Guide
 
 TODO
+
+## Usage Guide
+
+TODO
+
+
