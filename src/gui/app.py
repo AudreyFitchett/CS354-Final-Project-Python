@@ -6,15 +6,21 @@ import customtkinter as ctk
 
 ###### Window
 
-app = ctk.CTk() # Create an instance of the CTk class, which is the main application window
-# TODO: Make a logo for window icon
-app.title("Heart Disease Predictor") # Set the title of the window
-app.geometry("1200x600") # Set the size of the window
-app.resizable(False, False) # Make the window non-resizable
+
+
+# Consistent color scheme
+BG_COLOR = "#23272e"  # dark background
+FRAME_COLOR = "#23272e"  # same as background for consistency
+
+app = ctk.CTk()
+app.title("Heart Disease Predictor")
+app.geometry("1200x600")
+app.resizable(False, False)
+app.configure(bg=BG_COLOR)
 
 
 ###### Header frame
-header = ctk.CTkFrame(app, height=50, corner_radius=0)
+header = ctk.CTkFrame(app, height=50, corner_radius=0, fg_color=FRAME_COLOR)
 header.pack(side="top", fill="x")
 
 # Title label
@@ -23,49 +29,147 @@ title_label = ctk.CTkLabel(header, text="Heart Disease Predictor", font=("Arial"
 title_label.pack(side="left", padx=20, pady=10)
 
 ###### Buttons
-informationButton = ctk.CTkButton(header, text="About", width=250)
+informationButton = ctk.CTkButton(header, text="About", width=250, font=("Arial", 16))
 informationButton.pack(side="right", padx=20)
 
-settingsButton = ctk.CTkButton(header, text="Settings", width=250)
+settingsButton = ctk.CTkButton(header, text="Settings", width=250, font=("Arial", 16))
 settingsButton.pack(side="right", padx=20)
 
-clearButton = ctk.CTkButton(header, text="Clear", width=250)
+clearButton = ctk.CTkButton(header, text="Clear", width=250, font=("Arial", 16))
 clearButton.pack(side="right", padx=20)
 
 # TODO: Possibly add another button that leads to the model used for prediction, or to the dataset used for training the model.
 
 
-###### Prediction percentage label
 
-# Text that shows the percentage of the prediction on the right side of the window
-# TODO: Update this label with the actual prediction percentage when the model is implemented and integrated with the GUI. 
-# Needs to be able to update dynamically based on the model's output.
-# TODO: Consider changing font style and color depending on the percentage: green lower than 50%, yellow between 50% and 75%, 
-# red above 75%.
+###### Main content frame
+# Create a main frame to hold the left (inputs) and right (prediction) sections
 
-percentage_label = ctk.CTkLabel(app, text="Prediction: 0%", font=("Arial", 40))
-percentage_label.pack(side="right", padx=20, pady=10)
+main_frame = ctk.CTkFrame(app, fg_color=FRAME_COLOR)
+main_frame.pack(fill="both", expand=True)
+
+# Function to clear focus from any input box
+def clear_focus(event):
+	app.focus_set()
 
 
-###### Input boxes
 
-# Gender (M/F)
+# Left frame for input fields (now with two horizontal rows, centered)
+input_frame = ctk.CTkFrame(main_frame, width=700, fg_color=FRAME_COLOR)
+input_frame.pack(side="left", fill="both", expand=True, padx=40, pady=40)
 
-# Age (int)
+# Center container for input rows
+center_container = ctk.CTkFrame(input_frame, fg_color=FRAME_COLOR)
+center_container.pack(expand=True)
 
-# BMI (float number)
+# Two horizontal frames for input rows, centered horizontally
+row1 = ctk.CTkFrame(center_container, fg_color=FRAME_COLOR)
+row1.pack(pady=(0, 10))
+row2 = ctk.CTkFrame(center_container, fg_color=FRAME_COLOR)
+row2.pack()
 
-# Smoking (T/F)
+# Bind left mouse click on all relevant frames to clear focus
+main_frame.bind("<Button-1>", clear_focus)
+input_frame.bind("<Button-1>", clear_focus)
+center_container.bind("<Button-1>", clear_focus)
+row1.bind("<Button-1>", clear_focus)
+row2.bind("<Button-1>", clear_focus)
 
-# Alcohol Consumption (T/F)
 
-# Stroke (T/F)
+# Right: Prediction percentage label
+percentage_label = ctk.CTkLabel(main_frame, text="Prediction: 100%", font=("Arial", 40), width=400, anchor="center")
+percentage_label.pack(side="right", padx=20, pady=30, fill="y", expand=True)
 
-# Difficulty Walking (T/F)
 
-# Last 30 days bad physical health (int)
 
-# Last 30 days bad mental health (int)
+###### Questions (Input fields)
+
+
+
+# --- Input validation functions ---
+def validate_age(new_value):
+	if new_value == "":
+		return True
+	try:
+		val = int(new_value)
+		return 1 <= val <= 100
+	except ValueError:
+		return False
+
+def validate_bmi(new_value):
+	if new_value == "":
+		return True
+	try:
+		val = float(new_value)
+		return 0 <= val <= 60
+	except ValueError:
+		return False
+
+def validate_days(new_value):
+	if new_value == "":
+		return True
+	try:
+		val = int(new_value)
+		return 0 <= val <= 30
+	except ValueError:
+		return False
+
+vcmd_age = app.register(validate_age)
+vcmd_bmi = app.register(validate_bmi)
+vcmd_days = app.register(validate_days)
+
+# First row: Gender, Age, BMI, Smoking, Alcohol
+gender_label = ctk.CTkLabel(row1, text="Gender:", font=("Arial", 16))
+gender_label.grid(row=0, column=0, sticky="w", padx=(0, 2), pady=(0, 2))
+gender_var = ctk.StringVar(value="M/F")
+gender_option = ctk.CTkOptionMenu(row1, variable=gender_var, values=["Male", "Female"])
+gender_option.grid(row=1, column=0, padx=(0, 10), pady=(0, 10))
+
+age_label = ctk.CTkLabel(row1, text="Age:", font=("Arial", 16))
+age_label.grid(row=0, column=1, sticky="w", padx=(0, 2), pady=(0, 2))
+age_entry = ctk.CTkEntry(row1, placeholder_text="Enter age", validate="key", validatecommand=(vcmd_age, '%P'))
+age_entry.grid(row=1, column=1, padx=(0, 10), pady=(0, 10))
+
+bmi_label = ctk.CTkLabel(row1, text="BMI:", font=("Arial", 16))
+bmi_label.grid(row=0, column=2, sticky="w", padx=(0, 2), pady=(0, 2))
+bmi_entry = ctk.CTkEntry(row1, placeholder_text="Enter BMI", validate="key", validatecommand=(vcmd_bmi, '%P'))
+bmi_entry.grid(row=1, column=2, padx=(0, 10), pady=(0, 10))
+
+smoking_label = ctk.CTkLabel(row1, text="Smoking:", font=("Arial", 16))
+smoking_label.grid(row=0, column=3, sticky="w", padx=(0, 2), pady=(0, 2))
+smoking_var = ctk.StringVar(value="Y/N")
+smoking_option = ctk.CTkOptionMenu(row1, variable=smoking_var, values=["Yes", "No"])
+smoking_option.grid(row=1, column=3, padx=(0, 10), pady=(0, 10))
+
+alcohol_label = ctk.CTkLabel(row1, text="Alcohol Consumption:", font=("Arial", 16))
+alcohol_label.grid(row=0, column=4, sticky="w", padx=(0, 2), pady=(0, 2))
+alcohol_var = ctk.StringVar(value="Y/N")
+alcohol_option = ctk.CTkOptionMenu(row1, variable=alcohol_var, values=["Yes", "No"])
+alcohol_option.grid(row=1, column=4, padx=(0, 10), pady=(0, 10))
+
+# Second row: Stroke, Difficulty Walking, Bad Physical Health, Bad Mental Health
+stroke_label = ctk.CTkLabel(row2, text="Stroke:", font=("Arial", 16))
+stroke_label.grid(row=0, column=0, sticky="w", padx=(0, 2), pady=(0, 2))
+stroke_var = ctk.StringVar(value="Y/N")
+stroke_option = ctk.CTkOptionMenu(row2, variable=stroke_var, values=["Yes", "No"])
+stroke_option.grid(row=1, column=0, padx=(0, 10), pady=(0, 10))
+
+walk_label = ctk.CTkLabel(row2, text="Difficulty Walking:", font=("Arial", 16))
+walk_label.grid(row=0, column=1, sticky="w", padx=(0, 2), pady=(0, 2))
+walk_var = ctk.StringVar(value="Y/N")
+walk_option = ctk.CTkOptionMenu(row2, variable=walk_var, values=["Yes", "No"])
+walk_option.grid(row=1, column=1, padx=(0, 10), pady=(0, 10))
+
+
+phys_label = ctk.CTkLabel(row2, text="Bad Physical Health Days (last 30):", font=("Arial", 16))
+phys_label.grid(row=0, column=2, sticky="w", padx=(0, 2), pady=(0, 2))
+phys_entry = ctk.CTkEntry(row2, placeholder_text="Enter number of days", validate="key", validatecommand=(vcmd_days, '%P'))
+phys_entry.grid(row=1, column=2, padx=(0, 10), pady=(0, 10))
+
+mental_label = ctk.CTkLabel(row2, text="Bad Mental Health Days (last 30):", font=("Arial", 16))
+mental_label.grid(row=0, column=3, sticky="w", padx=(0, 2), pady=(0, 2))
+mental_entry = ctk.CTkEntry(row2, placeholder_text="Enter number of days", validate="key", validatecommand=(vcmd_days, '%P'))
+mental_entry.grid(row=1, column=3, padx=(0, 10), pady=(0, 10))
 
 
 
