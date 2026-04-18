@@ -23,20 +23,44 @@ for col in yes_no_cols:
 
 # More encoding
 AGE_CATEGORY = {
-    1: "Age 18 to 24",
-    2: "Age 25 to 29",
-    3: "Age 30 to 34",
-    4: "Age 35 to 39",
-    5: "Age 40 to 44",
-    6: "Age 45 to 49",
-    7: "Age 50 to 54",
-    8: "Age 55 to 59",
-    9: "Age 60 to 64",
-    10: "Age 65 to 69",
-    11: "Age 70 to 74",
-    12: "Age 75 to 79",
-    13: "Age 80 or older"
+    "18-24": 1,
+    "25-29": 2,
+    "30-34": 3,
+    "35-39": 4,
+    "40-44": 5,
+    "45-49": 6,
+    "50-54": 7,
+    "55-59": 8,
+    "60-64": 9,
+    "65-69": 10,
+    "70-74": 11,
+    "75-79": 12,
+    "80 or older": 13
 }
+
+df["Race"] = df["Race"].map({
+    "White": 1,
+    "Black": 2,
+    "Asian": 3,
+    "American Indian/Alaskan Native": 4,
+    "Hispanic": 5,
+    "Other": 6
+})
+
+df["Diabetic"] = df["Diabetic"].map({
+    "No": 0,
+    "No, borderline diabetes": 1,
+    "Yes": 2,
+    "Yes (during pregnancy)": 1
+})
+
+df["GenHealth"] = df["GenHealth"].map({
+    "Poor": 1,
+    "Fair": 2,
+    "Good": 3,
+    "Very good": 4,
+    "Excellent": 5
+})
 
 def small_bmi(bmi):
     if bmi == 0:
@@ -44,24 +68,22 @@ def small_bmi(bmi):
     else:
         return int(bmi / 10)
 
-def big_health(health)
+def big_health(health):
     return int(health / 10) + 1
     
 df["HeartDisease"] = df["HeartDisease"].map({"Yes": 1, "No": 0})
 
 df["Sex"] = df["Sex"].map({"Female": 1, "Male": 0})
 
-df["AgeCategory"] = df("AgeCategory".map(AGE_CATEGORY))
+df["AgeCategory"] = df["AgeCategory"].map(AGE_CATEGORY)
 
-df["BMI"] = df("BMI".map(small_bmi, "BMI"))
+df["BMI"] = df["BMI"].apply(small_bmi)
 
-df["PhysicalHealth"] = df("PhysicalHealth".map(small_bmi, "PhysicalHealth"))
+df["PhysicalHealth"] = df["PhysicalHealth"].apply(small_bmi)
 
-pmask  = df["PhysicalHealth"]  != 0
+df["MentalHealth"] = df["MentalHealth"].apply(small_bmi)
 
-df["MentalHealth"] = df("MentalHealth".map(small_bmi, "MentalHealth"))
-
-mmask  = df["MentalHealth"]  != 0
+df = df.fillna(0)
 
 # Split into X and y
 print("\nSplitting data...")
@@ -78,7 +100,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 # Train model
 print("\nTraining model...")
 
-model = LogisticRegression(max_iter=1000)
+model = LogisticRegression(max_iter=1000, class_weight="balanced")
 model.fit(X_train, y_train)
 
 # Test model
