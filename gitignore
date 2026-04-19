@@ -1,0 +1,15 @@
+# Environments
+.venv/
+env/
+venv/
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Test caches
+.pytest_cache/
+
+# Data and Models
+*.csv
+*.pkl
