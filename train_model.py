@@ -73,7 +73,7 @@ def big_health(health):
     
 df["HeartDisease"] = df["HeartDisease"].map({"Yes": 1, "No": 0})
 
-df["Sex"] = df["Sex"].map({"Female": 1, "Male": 0})
+df["Sex"] = df["Sex"].map({"Male": 1, "Female": 0})
 
 df["AgeCategory"] = df["AgeCategory"].map(AGE_CATEGORY)
 
