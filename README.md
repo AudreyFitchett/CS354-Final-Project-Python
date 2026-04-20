@@ -12,11 +12,14 @@ Developed by:
 
 ## Description
 
-TODO
+This program uses machine learning to predict whether a person has or will have heart disease. 
 
 ## Features
 
-TODO
+- Machine Learning Model
+- Graphical User Interface
+- Input Sanitization
+- Testing Suite
 
 ## Testing
 
