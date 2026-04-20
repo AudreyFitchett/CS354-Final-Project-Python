@@ -29,11 +29,12 @@ header = ctk.CTkFrame(app, height=50, corner_radius=0, fg_color=FRAME_COLOR)
 header.pack(side="top", fill="x")
 
 # Title label
-title_label = ctk.CTkLabel(header, text="Heart Disease Predictor", font=("Arial", 20, "bold"))
+title_label = ctk.CTkLabel(header, text="      Heart Disease Predictor", font=("Arial", 20, "bold"))
 title_label.pack(side="left", padx=20, pady=10)
 
 ###### Buttons
-informationButton = ctk.CTkButton(header, text="About", width=250, font=("Arial", 16))
+
+informationButton = ctk.CTkButton(header, text="About", width=400, font=("Arial", 16))
 informationButton.pack(side="right", padx=20)
 
 # Function to show About popup
@@ -63,8 +64,7 @@ def show_about():
 
 informationButton.configure(command=show_about)
 
-settingsButton = ctk.CTkButton(header, text="Settings", width=250, font=("Arial", 16))
-settingsButton.pack(side="right", padx=20)
+
 
 
 # Function to clear all input fields and reset dropdowns
@@ -87,7 +87,8 @@ def clear_inputs():
 	kidney_var.set("Y/N")
 	skin_cancer_var.set("Y/N")
 
-clearButton = ctk.CTkButton(header, text="Clear", width=250, font=("Arial", 16), command=clear_inputs)
+
+clearButton = ctk.CTkButton(header, text="Clear", width=400, font=("Arial", 16), command=clear_inputs)
 clearButton.pack(side="right", padx=20)
 
 
