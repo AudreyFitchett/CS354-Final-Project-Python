@@ -59,6 +59,12 @@ TODO
 TODO
 
 ## Sources
+
+Source data is from: 
+
+https://www.kaggle.com/datasets/kamilpytlak/personal-key-indicators-of-heart-disease/data
+
+Referenced: 
 https://docs.python.org/3/tutorial/index.html 
 https://www.geeksforgeeks.org/python/complex-numbers-in-python-set-1-introduction/
 
