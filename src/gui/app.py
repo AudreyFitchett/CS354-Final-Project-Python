@@ -1,12 +1,17 @@
+
+
 # app.py
 # This will be the main GUI application class.
 
 import customtkinter as ctk
 
+# --- Import predict_heart_disease from predict.py ---
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from predict import predict_heart_disease
 
 ###### Window
-
-
 
 # Consistent color scheme
 BG_COLOR = "#23272e"  # dark background
@@ -32,10 +37,50 @@ title_label.pack(side="left", padx=20, pady=10)
 informationButton = ctk.CTkButton(header, text="About", width=250, font=("Arial", 16))
 informationButton.pack(side="right", padx=20)
 
+# Function to show About popup
+
+def show_about():
+	about_popup = ctk.CTkToplevel(app)
+	about_popup.title("About")
+	about_popup.geometry("500x320")
+	about_popup.resizable(False, False)
+	about_popup.configure(bg=BG_COLOR)
+	about_popup.transient(app)  # Always on top of main window
+	about_popup.grab_set()      # Modal behavior
+
+	# Center the popup on the main window
+	app.update_idletasks()
+	x = app.winfo_x() + (app.winfo_width() // 2) - 250
+	y = app.winfo_y() + (app.winfo_height() // 2) - 160
+	about_popup.geometry(f"500x320+{x}+{y}")
+
+	about_label = ctk.CTkLabel(
+		about_popup,
+		text="Heart Disease Predictor\n\nThis application predicts the likelihood of heart disease based on user input.\n\nDeveloped for CS354 Final Project.",
+		font=("Arial", 16),
+		justify="center"
+	)
+	about_label.pack(expand=True, padx=20, pady=20)
+
+informationButton.configure(command=show_about)
+
 settingsButton = ctk.CTkButton(header, text="Settings", width=250, font=("Arial", 16))
 settingsButton.pack(side="right", padx=20)
 
-clearButton = ctk.CTkButton(header, text="Clear", width=250, font=("Arial", 16))
+
+# Function to clear all input fields and reset dropdowns
+def clear_inputs():
+	age_entry.delete(0, 'end')
+	bmi_entry.delete(0, 'end')
+	phys_entry.delete(0, 'end')
+	mental_entry.delete(0, 'end')
+	gender_var.set("M/F")
+	smoking_var.set("Y/N")
+	alcohol_var.set("Y/N")
+	stroke_var.set("Y/N")
+	walk_var.set("Y/N")
+
+clearButton = ctk.CTkButton(header, text="Clear", width=250, font=("Arial", 16), command=clear_inputs)
 clearButton.pack(side="right", padx=20)
 
 # TODO: Possibly add another button that leads to the model used for prediction, or to the dataset used for training the model.
@@ -61,6 +106,8 @@ input_frame.pack(side="left", fill="both", expand=True, padx=40, pady=40)
 # Center container for input rows
 center_container = ctk.CTkFrame(input_frame, fg_color=FRAME_COLOR)
 center_container.pack(expand=True)
+
+
 
 # Two horizontal frames for input rows, centered horizontally
 row1 = ctk.CTkFrame(center_container, fg_color=FRAME_COLOR)
@@ -161,7 +208,7 @@ walk_option = ctk.CTkOptionMenu(row2, variable=walk_var, values=["Yes", "No"])
 walk_option.grid(row=1, column=1, padx=(0, 10), pady=(0, 10))
 
 
-phys_label = ctk.CTkLabel(row2, text="Bad Physical Health Days (last 30):", font=("Arial", 16))
+phys_label = ctk.CTkLabel(row2, text="Bad Physical Health Days (last 30):     ", font=("Arial", 16))
 phys_label.grid(row=0, column=2, sticky="w", padx=(0, 2), pady=(0, 2))
 phys_entry = ctk.CTkEntry(row2, placeholder_text="Enter number of days", validate="key", validatecommand=(vcmd_days, '%P'))
 phys_entry.grid(row=1, column=2, padx=(0, 10), pady=(0, 10))
@@ -170,6 +217,41 @@ mental_label = ctk.CTkLabel(row2, text="Bad Mental Health Days (last 30):", font
 mental_label.grid(row=0, column=3, sticky="w", padx=(0, 2), pady=(0, 2))
 mental_entry = ctk.CTkEntry(row2, placeholder_text="Enter number of days", validate="key", validatecommand=(vcmd_days, '%P'))
 mental_entry.grid(row=1, column=3, padx=(0, 10), pady=(0, 10))
+
+
+
+
+# --- Submit button callback ---
+def on_submit():
+	# Collect user input from GUI
+	user_input = {
+		"BMI": float(bmi_entry.get()) if bmi_entry.get() else 0,
+		"Smoking": smoking_var.get(),
+		"AlcoholDrinking": alcohol_var.get(),
+		"Stroke": stroke_var.get(),
+		"PhysicalHealth": int(phys_entry.get()) if phys_entry.get() else 0,
+		"MentalHealth": int(mental_entry.get()) if mental_entry.get() else 0,
+		"DiffWalking": walk_var.get(),
+		"Sex": gender_var.get(),
+		# The following fields are not in the GUI, so use default values or placeholders
+		"AgeCategory": "55-59",  # Default, update if you add to GUI
+		"Race": "White",         # Default, update if you add to GUI
+		"Diabetic": "No",       # Default, update if you add to GUI
+		"PhysicalActivity": "No", # Default, update if you add to GUI
+		"GenHealth": "Good",    # Default, update if you add to GUI
+		"SleepTime": 7,          # Default, update if you add to GUI
+		"Asthma": "No",         # Default, update if you add to GUI
+		"KidneyDisease": "No",  # Default, update if you add to GUI
+		"SkinCancer": "No"      # Default, update if you add to GUI
+	}
+	try:
+		result = predict_heart_disease(user_input)
+		percentage_label.configure(text=f"Prediction: {'Yes' if result == 1 else 'No'}")
+	except Exception as e:
+		percentage_label.configure(text=f"Error: {e}")
+
+submit_button = ctk.CTkButton(center_container, text="Submit", font=("Arial", 18, "bold"), fg_color="#FFD600", text_color="#23272e", hover_color="#FFE066", corner_radius=8, height=40, width=200, command=on_submit)
+submit_button.pack(pady=(30, 0))
 
 
 
