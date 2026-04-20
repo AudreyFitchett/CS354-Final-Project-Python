@@ -124,7 +124,7 @@ row2.bind("<Button-1>", clear_focus)
 
 
 # Right: Prediction percentage label
-percentage_label = ctk.CTkLabel(main_frame, text="Prediction: 100%", font=("Arial", 40), width=400, anchor="center")
+percentage_label = ctk.CTkLabel(main_frame, text="", font=("Arial", 40), width=400, anchor="center", wraplength=380, justify="center")
 percentage_label.pack(side="right", padx=20, pady=30, fill="y", expand=True)
 
 
@@ -177,8 +177,14 @@ age_label.grid(row=0, column=1, sticky="w", padx=(0, 2), pady=(0, 2))
 age_entry = ctk.CTkEntry(row1, placeholder_text="Enter age", validate="key", validatecommand=(vcmd_age, '%P'))
 age_entry.grid(row=1, column=1, padx=(0, 10), pady=(0, 10))
 
-bmi_label = ctk.CTkLabel(row1, text="BMI:", font=("Arial", 16))
+bmi_label = ctk.CTkLabel(row1, text="BMI:", font=("Arial", 16), text_color="#3399FF", cursor="hand2")
 bmi_label.grid(row=0, column=2, sticky="w", padx=(0, 2), pady=(0, 2))
+
+def open_bmi_url(event=None):
+	import webbrowser
+	webbrowser.open_new_tab("https://www.calculator.net/bmi-calculator.html") 
+
+bmi_label.bind("<Button-1>", open_bmi_url)
 bmi_entry = ctk.CTkEntry(row1, placeholder_text="Enter BMI", validate="key", validatecommand=(vcmd_bmi, '%P'))
 bmi_entry.grid(row=1, column=2, padx=(0, 10), pady=(0, 10))
 
@@ -224,8 +230,13 @@ mental_entry.grid(row=1, column=3, padx=(0, 10), pady=(0, 10))
 # --- Submit button callback ---
 def on_submit():
 	# Collect user input from GUI
+	# Validate required fields (all except mental and physical health days)
+	if not bmi_entry.get() or smoking_var.get() not in ["Yes", "No"] or alcohol_var.get() not in ["Yes", "No"] or stroke_var.get() not in ["Yes", "No"] or walk_var.get() not in ["Yes", "No"] or gender_var.get() not in ["Male", "Female"]:
+		percentage_label.configure(text="Please fill out all fields.", text_color="#FFD600")
+		return
+
 	user_input = {
-		"BMI": float(bmi_entry.get()) if bmi_entry.get() else 0,
+		"BMI": float(bmi_entry.get()),
 		"Smoking": smoking_var.get(),
 		"AlcoholDrinking": alcohol_var.get(),
 		"Stroke": stroke_var.get(),
@@ -244,11 +255,23 @@ def on_submit():
 		"KidneyDisease": "No",  # Default, update if you add to GUI
 		"SkinCancer": "No"      # Default, update if you add to GUI
 	}
-	try:
-		result = predict_heart_disease(user_input)
-		percentage_label.configure(text=f"Prediction: {'Yes' if result == 1 else 'No'}")
-	except Exception as e:
-		percentage_label.configure(text=f"Error: {e}")
+	def flash_label():
+		# Fade out
+		percentage_label.configure(text="Processing...", text_color="#FFD600")
+		percentage_label.update()
+		app.after(300, show_prediction)
+
+	def show_prediction():
+		try:
+			result = predict_heart_disease(user_input)
+			if result == 1:
+				percentage_label.configure(text="Prediction: Yes", text_color="#FF3333")  # Red
+			else:
+				percentage_label.configure(text="Prediction: No", text_color="#33CC33")   # Green
+		except Exception as e:
+			percentage_label.configure(text=f"Error: {e}", text_color="#FFD600")
+
+	flash_label()
 
 submit_button = ctk.CTkButton(center_container, text="Submit", font=("Arial", 18, "bold"), fg_color="#FFD600", text_color="#23272e", hover_color="#FFE066", corner_radius=8, height=40, width=200, command=on_submit)
 submit_button.pack(pady=(30, 0))
