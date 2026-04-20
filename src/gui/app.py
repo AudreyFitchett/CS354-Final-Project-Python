@@ -19,7 +19,7 @@ FRAME_COLOR = "#23272e"  # same as background for consistency
 
 app = ctk.CTk()
 app.title("Heart Disease Predictor")
-app.geometry("1200x600")
+app.geometry("1200x750")
 app.resizable(False, False)
 app.configure(bg=BG_COLOR)
 
@@ -29,7 +29,6 @@ header = ctk.CTkFrame(app, height=50, corner_radius=0, fg_color=FRAME_COLOR)
 header.pack(side="top", fill="x")
 
 # Title label
-# TODO: Add a logo to the left of the title label
 title_label = ctk.CTkLabel(header, text="Heart Disease Predictor", font=("Arial", 20, "bold"))
 title_label.pack(side="left", padx=20, pady=10)
 
@@ -74,17 +73,22 @@ def clear_inputs():
 	bmi_entry.delete(0, 'end')
 	phys_entry.delete(0, 'end')
 	mental_entry.delete(0, 'end')
+	sleep_entry.delete(0, 'end')
 	gender_var.set("M/F")
 	smoking_var.set("Y/N")
 	alcohol_var.set("Y/N")
 	stroke_var.set("Y/N")
 	walk_var.set("Y/N")
+	race_var.set("Select")
+	diabetic_var.set("Select")
+	phys_activity_var.set("Y/N")
+	gen_health_var.set("Select")
+	asthma_var.set("Y/N")
+	kidney_var.set("Y/N")
+	skin_cancer_var.set("Y/N")
 
 clearButton = ctk.CTkButton(header, text="Clear", width=250, font=("Arial", 16), command=clear_inputs)
 clearButton.pack(side="right", padx=20)
-
-# TODO: Possibly add another button that leads to the model used for prediction, or to the dataset used for training the model.
-
 
 
 ###### Main content frame
@@ -109,11 +113,15 @@ center_container.pack(expand=True)
 
 
 
-# Two horizontal frames for input rows, centered horizontally
+# Four horizontal frames for input rows, centered horizontally
 row1 = ctk.CTkFrame(center_container, fg_color=FRAME_COLOR)
 row1.pack(pady=(0, 10))
 row2 = ctk.CTkFrame(center_container, fg_color=FRAME_COLOR)
-row2.pack()
+row2.pack(pady=(0, 10))
+row3 = ctk.CTkFrame(center_container, fg_color=FRAME_COLOR)
+row3.pack(pady=(0, 10))
+row4 = ctk.CTkFrame(center_container, fg_color=FRAME_COLOR)
+row4.pack()
 
 # Bind left mouse click on all relevant frames to clear focus
 main_frame.bind("<Button-1>", clear_focus)
@@ -121,6 +129,8 @@ input_frame.bind("<Button-1>", clear_focus)
 center_container.bind("<Button-1>", clear_focus)
 row1.bind("<Button-1>", clear_focus)
 row2.bind("<Button-1>", clear_focus)
+row3.bind("<Button-1>", clear_focus)
+row4.bind("<Button-1>", clear_focus)
 
 
 # Right: Prediction percentage label
@@ -133,15 +143,14 @@ percentage_label.pack(side="right", padx=20, pady=30, fill="y", expand=True)
 
 
 
+
 # --- Input validation functions ---
 def validate_age(new_value):
 	if new_value == "":
 		return True
-	try:
-		val = int(new_value)
-		return 1 <= val <= 100
-	except ValueError:
+	if not new_value.isdigit():
 		return False
+	return int(new_value) <= 100
 
 def validate_bmi(new_value):
 	if new_value == "":
@@ -161,9 +170,17 @@ def validate_days(new_value):
 	except ValueError:
 		return False
 
+def validate_sleep(new_value):
+	if new_value == "":
+		return True
+	if not new_value.isdigit():
+		return False
+	return int(new_value) <= 24
+
 vcmd_age = app.register(validate_age)
 vcmd_bmi = app.register(validate_bmi)
 vcmd_days = app.register(validate_days)
+vcmd_sleep = app.register(validate_sleep)
 
 # First row: Gender, Age, BMI, Smoking, Alcohol
 gender_label = ctk.CTkLabel(row1, text="Gender:", font=("Arial", 16))
@@ -224,16 +241,106 @@ mental_label.grid(row=0, column=3, sticky="w", padx=(0, 2), pady=(0, 2))
 mental_entry = ctk.CTkEntry(row2, placeholder_text="Enter number of days", validate="key", validatecommand=(vcmd_days, '%P'))
 mental_entry.grid(row=1, column=3, padx=(0, 10), pady=(0, 10))
 
+# Third row: Race, Diabetic, Physical Activity, General Health
+race_label = ctk.CTkLabel(row3, text="Race:", font=("Arial", 16))
+race_label.grid(row=0, column=0, sticky="w", padx=(0, 2), pady=(0, 2))
+race_var = ctk.StringVar(value="Select")
+race_option = ctk.CTkOptionMenu(row3, variable=race_var, values=["White", "Black", "Asian", "American Indian/Alaskan Native", "Hispanic", "Other"])
+race_option.grid(row=1, column=0, padx=(0, 10), pady=(0, 10))
+
+diabetic_label = ctk.CTkLabel(row3, text="Diabetic:", font=("Arial", 16))
+diabetic_label.grid(row=0, column=1, sticky="w", padx=(0, 2), pady=(0, 2))
+diabetic_var = ctk.StringVar(value="Select")
+diabetic_option = ctk.CTkOptionMenu(row3, variable=diabetic_var, values=["No", "No, borderline diabetes", "Yes", "Yes (during pregnancy)"])
+diabetic_option.grid(row=1, column=1, padx=(0, 10), pady=(0, 10))
+
+phys_activity_label = ctk.CTkLabel(row3, text="Physically Active:", font=("Arial", 16))
+phys_activity_label.grid(row=0, column=2, sticky="w", padx=(0, 2), pady=(0, 2))
+phys_activity_var = ctk.StringVar(value="Y/N")
+phys_activity_option = ctk.CTkOptionMenu(row3, variable=phys_activity_var, values=["Yes", "No"])
+phys_activity_option.grid(row=1, column=2, padx=(0, 10), pady=(0, 10))
+
+gen_health_label = ctk.CTkLabel(row3, text="General Health:", font=("Arial", 16))
+gen_health_label.grid(row=0, column=3, sticky="w", padx=(0, 2), pady=(0, 2))
+gen_health_var = ctk.StringVar(value="Select")
+gen_health_option = ctk.CTkOptionMenu(row3, variable=gen_health_var, values=["Poor", "Fair", "Good", "Very good", "Excellent"])
+gen_health_option.grid(row=1, column=3, padx=(0, 10), pady=(0, 10))
+
+# Fourth row: Sleep Time, Asthma, Kidney Disease, Skin Cancer
+sleep_label = ctk.CTkLabel(row4, text="Sleep Time (hours/night):    ", font=("Arial", 16))
+sleep_label.grid(row=0, column=0, sticky="w", padx=(0, 2), pady=(0, 2))
+sleep_entry = ctk.CTkEntry(row4, placeholder_text="Enter hours", validate="key", validatecommand=(vcmd_sleep, '%P'))
+sleep_entry.grid(row=1, column=0, padx=(0, 10), pady=(0, 10))
+
+asthma_label = ctk.CTkLabel(row4, text="Asthma:", font=("Arial", 16))
+asthma_label.grid(row=0, column=1, sticky="w", padx=(0, 2), pady=(0, 2))
+asthma_var = ctk.StringVar(value="Y/N")
+asthma_option = ctk.CTkOptionMenu(row4, variable=asthma_var, values=["Yes", "No"])
+asthma_option.grid(row=1, column=1, padx=(0, 10), pady=(0, 10))
+
+kidney_label = ctk.CTkLabel(row4, text="Kidney Disease:", font=("Arial", 16))
+kidney_label.grid(row=0, column=2, sticky="w", padx=(0, 2), pady=(0, 2))
+kidney_var = ctk.StringVar(value="Y/N")
+kidney_option = ctk.CTkOptionMenu(row4, variable=kidney_var, values=["Yes", "No"])
+kidney_option.grid(row=1, column=2, padx=(0, 10), pady=(0, 10))
+
+skin_cancer_label = ctk.CTkLabel(row4, text="Skin Cancer:", font=("Arial", 16))
+skin_cancer_label.grid(row=0, column=3, sticky="w", padx=(0, 2), pady=(0, 2))
+skin_cancer_var = ctk.StringVar(value="Y/N")
+skin_cancer_option = ctk.CTkOptionMenu(row4, variable=skin_cancer_var, values=["Yes", "No"])
+skin_cancer_option.grid(row=1, column=3, padx=(0, 10), pady=(0, 10))
+
 
 
 
 # --- Submit button callback ---
 def on_submit():
+
 	# Collect user input from GUI
 	# Validate required fields (all except mental and physical health days)
-	if not bmi_entry.get() or smoking_var.get() not in ["Yes", "No"] or alcohol_var.get() not in ["Yes", "No"] or stroke_var.get() not in ["Yes", "No"] or walk_var.get() not in ["Yes", "No"] or gender_var.get() not in ["Male", "Female"]:
+	age_val = age_entry.get()
+	try:
+		age_int = int(age_val)
+		if not (18 <= age_int <= 100):
+			raise ValueError()
+	except ValueError:
+		percentage_label.configure(text="Enter valid age (18-100)", text_color="#FFD600")
+		return
+
+	if not bmi_entry.get() or gender_var.get() not in ["Male", "Female"] \
+		or any(v.get() not in ["Yes", "No"] for v in [smoking_var, alcohol_var, stroke_var, walk_var, phys_activity_var, asthma_var, kidney_var, skin_cancer_var]) \
+		or race_var.get() == "Select" or diabetic_var.get() == "Select" or gen_health_var.get() == "Select" \
+		or not sleep_entry.get():
 		percentage_label.configure(text="Please fill out all fields.", text_color="#FFD600")
 		return
+
+	def get_age_category(age):
+		if age <= 24:
+			return "18-24"
+		elif age <= 29:
+			return "25-29"
+		elif age <= 34:
+			return "30-34"
+		elif age <= 39:
+			return "35-39"
+		elif age <= 44:
+			return "40-44"
+		elif age <= 49:
+			return "45-49"
+		elif age <= 54:
+			return "50-54"
+		elif age <= 59:
+			return "55-59"
+		elif age <= 64:
+			return "60-64"
+		elif age <= 69:
+			return "65-69"
+		elif age <= 74:
+			return "70-74"
+		elif age <= 79:
+			return "75-79"
+		else:
+			return "80 or older"
 
 	user_input = {
 		"BMI": float(bmi_entry.get()),
@@ -244,16 +351,15 @@ def on_submit():
 		"MentalHealth": int(mental_entry.get()) if mental_entry.get() else 0,
 		"DiffWalking": walk_var.get(),
 		"Sex": gender_var.get(),
-		# The following fields are not in the GUI, so use default values or placeholders
-		"AgeCategory": "55-59",  # Default, update if you add to GUI
-		"Race": "White",         # Default, update if you add to GUI
-		"Diabetic": "No",       # Default, update if you add to GUI
-		"PhysicalActivity": "No", # Default, update if you add to GUI
-		"GenHealth": "Good",    # Default, update if you add to GUI
-		"SleepTime": 7,          # Default, update if you add to GUI
-		"Asthma": "No",         # Default, update if you add to GUI
-		"KidneyDisease": "No",  # Default, update if you add to GUI
-		"SkinCancer": "No"      # Default, update if you add to GUI
+		"AgeCategory": get_age_category(age_int),
+		"Race": race_var.get(),
+		"Diabetic": diabetic_var.get(),
+		"PhysicalActivity": phys_activity_var.get(),
+		"GenHealth": gen_health_var.get(),
+		"SleepTime": int(sleep_entry.get()),
+		"Asthma": asthma_var.get(),
+		"KidneyDisease": kidney_var.get(),
+		"SkinCancer": skin_cancer_var.get(),
 	}
 	def flash_label():
 		# Fade out
